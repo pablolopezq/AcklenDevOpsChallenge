@@ -1,7 +1,7 @@
 ---
 
 - name: Install nginx
-  hosts: instance
+  hosts: instance_one instance_two
   become: true
   tasks:
     - name: update
@@ -19,7 +19,7 @@
         state: started
 
 - name: Install node and pm2
-  hosts: instance
+  hosts: instance_one instance_two
   become: true
   tasks:
     - name: update
@@ -31,33 +31,38 @@
         name: nodejs
         state: latest
 
+    - name: npm
+      apt:
+        name: npm
+        state: latest
+
     - name: pm2
       npm:
         global: yes
         name: pm2
 
 - name: Run app
-  hosts: instance
+  hosts: instance_one instance_two
   become: true
   tasks:
     - name: pull repo
       git:
         repo: https://github.com/abkunal/Chat-App-using-Socket.io.git
-        dest: /home/pablo/Desktop/app
+        dest: /home/ubuntu/app
 
     - name: install packages
       shell: npm install
       args:
-        chdir: /home/pablo/Desktop/app
+        chdir: /home/ubuntu/app
 
     - name: run app
       become: no
       shell: pm2 start app.js --name "chatapp"
       args:
-        chdir: /home/pablo/Desktop/app
+        chdir: /home/ubuntu/app
 
 - name: Configure nginx reverse proxy
-  hosts: instance
+  hosts: instance_one instance_two
   become: true
   tasks:
     - name: create conf file
