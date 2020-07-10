@@ -55,3 +55,43 @@
       shell: pm2 start app.js --name "chatapp"
       args:
         chdir: /home/pablo/Desktop/app
+
+- name: Configure nginx reverse proxy
+  hosts: instance
+  become: true
+  tasks:
+    - name: create conf file
+      file:
+        path: /etc/nginx/sites-available/chatapp.conf
+        state: touch
+    
+    - name: write conf file
+      blockinfile:
+        path: /etc/nginx/sites-available/chatapp.conf
+        block: |
+          server {
+            listen 80;
+            location / {
+              proxy_pass http://localhost:5000;
+            }
+          }
+
+    - name: check if default exists
+      stat:
+        path: /etc/nginx/sites-enabled/default
+      register: check_default
+
+    - name: unlink default
+      shell: unlink /etc/nginx/sites-enabled/default
+      when: check_default.stat.exists
+    
+    - name: link conf file
+      file:
+        src: /etc/nginx/sites-available/chatapp.conf
+        path: /etc/nginx/sites-enabled/chatapp.conf
+        state: link
+
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
