@@ -1,25 +1,25 @@
 provider "aws" {
-  region = "us-east-2"
+  region = var.region
 }
 
 data "aws_vpc" "default" {
-  id = "vpc-2193494a"
+  id = var.vpc_id
 }
 
 data "aws_internet_gateway" "gateway" {
-  internet_gateway_id = "igw-936b2ffb"
+  internet_gateway_id = var.gateway_id
 }
 
 resource "aws_subnet" "subnet_one" {
   vpc_id            = data.aws_vpc.default.id
-  cidr_block        = "172.31.150.0/24"
-  availability_zone = "us-east-2a"
+  cidr_block        = var.subnet_one_block
+  availability_zone = var.zone_one
 }
 
 resource "aws_subnet" "subnet_two" {
   vpc_id            = data.aws_vpc.default.id
-  cidr_block        = "172.31.100.0/24"
-  availability_zone = "us-east-2b"
+  cidr_block        = var.subnet_two_block
+  availability_zone = var.zone_two
 }
 
 resource "aws_eip" "eip_one" {
@@ -34,30 +34,64 @@ resource "aws_eip" "eip_two" {
   associate_with_private_ip = aws_instance.instance_two.private_ip
 }
 
-resource "aws_key_pair" "key_one" {
-  key_name   = "key_one"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNBcyBmya/8tSwi8nlchOgJs4vDAybxtKjj5UKOxVWCyUXOlELq5q05sM29mGkzdVovSTDxguZv11A4P+96cjCRRXDyeZg/ea7akBVJjv7cJSE1jT9rmw42TZ88NSApmogl4mjnFidgPISASgu4SbRFIBQQFtfR3Ge8e2J1DTvEiJY6gGUpo5pMpbHgMmaaOx3+KgFXdL+r0JVu61/vh3w+CNE36teQclw2LsuHSQUMSfcKKwQIp96YGD3g3oWhRLv31TnTwXS8kFOUHb6+HcdjhV8UxgYfLO747gBoH5xt1XDh9gvLmd2eHKaQCFRkbb8jB4O/XB9l8CZhAtxGw7J6ce0vXL5Z1Q/+V2S+50WP2aEYoObl7X6dQxg9mzzDjdZenc27JDizxoK9ZFopX2Z4pw32p0AwjuRYkZGSrmNWcHIu9K4d0GWL657wCl5y37pLa+9Qi5lbLFIW9DAOj+W5IiJ6aoFM606M2yQ2ceLMmQS1ks81fys3GmaDRdpsjs= pablo@wall-e"
+resource "aws_key_pair" "key" {
+  key_name   = "key"
+  public_key = var.public_key
 }
 
 resource "aws_key_pair" "key_two" {
   key_name   = "key_two"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCxhc/MmYv3vD+VQ93kGLGeWVRD9SvQzLBidu+eRo20X03ex9vIWFvwD4+NzMMRyAZqwKCtvqniXb/nwIFmXyJjn7+WUddkN0HCTC8lxjhxOJxdSofg/7JMlrU1oyzpbW+WWi9BokqqMRKUhMgYWQDycZAq9h2eGasAlT1TPYM727iIoCOMd4AM0pa5bK5G/c7LrivZlqG+f6+ajta2arS+qR0JGBW2wMRTzEgC8iGhMIsW7iNlSpEScs4BBtU7biQeRs4MnCs9a7Ecv6GXAS5yah6UbkYVe1HoNE66YJUNoCL4qdLVPSgzPW/M0CzeLTNxILI1UW4qp9D3C2lDz6fYH0yUAMQMJVMSEJyLOBfQNk0MTgtzz8VUCRpsGDxfwwrpPGy5j0w6e09jmsdFHxDFntVZLnQHMj3c0RRc3htu29+H4t/4N5Dv+9lttQaRwzUUqPiqTqjBmSDHZBKhbRXwizMAIGUUFnK49Vft+UH8e9eOlnUc7wq8tLZy3qgLbSU= pablo@wall-e"
+  public_key = var.public_key_two
 }
 
 resource "aws_instance" "instance_one" {
-  ami             = "ami-007e9fbe81cfbf4fa"
-  instance_type   = "t2.micro"
+  ami             = var.image
+  instance_type   = var.ec2_type
   subnet_id       = aws_subnet.subnet_one.id
   security_groups = [aws_security_group.sec_group.id]
-  key_name        = aws_key_pair.key_one.key_name
+  key_name        = aws_key_pair.key.key_name
+  tags = {
+    Name = "one"
+  }
+  /*
+  provisioner "remote-exec" {
+    inline = ["sudo hostname"]
+    connection {
+      type = "ssh"
+      user = var.ansible_user
+      private_key = var.private_key_one
+      host = self.public_ip
+    }
+  }
+
+  provisioner "local-exec" {
+    command = "ansible-playbook ../ansible/deploy.yml -i ../ansible/ec2.py --private-key=../keys/instance_one.pem --user ubuntu"
+  }*/
 }
 
 resource "aws_instance" "instance_two" {
-  ami             = "ami-007e9fbe81cfbf4fa"
-  instance_type   = "t2.micro"
+  ami             = var.image
+  instance_type   = var.ec2_type
   subnet_id       = aws_subnet.subnet_two.id
   security_groups = [aws_security_group.sec_group.id]
-  key_name        = aws_key_pair.key_two.key_name
+  key_name        = aws_key_pair.key.key_name
+  tags = {
+    Name = "two"
+  }
+  /*
+  provisioner "remote-exec" {
+    inline = ["sudo hostname"]
+    connection {
+      type = "ssh"
+      user = var.ansible_user
+      private_key = var.private_key_two
+      host = self.public_ip
+    }
+  }
+
+  provisioner "local-exec" {
+    command = "ansible-playbook ../ansible/deploy.yml -i ../ansible/ec2.py --private-key=../keys/instance_one.pem --user ubuntu"
+  }*/
 }
 
 

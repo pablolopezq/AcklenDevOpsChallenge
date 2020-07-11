@@ -1,7 +1,7 @@
 ---
 
 - name: Install nginx
-  hosts: instance_one instance_two
+  hosts: tag_Name_one tag_Name_two
   become: true
   tasks:
     - name: update
@@ -19,7 +19,7 @@
         state: started
 
 - name: Install node and pm2
-  hosts: instance_one instance_two
+  hosts: tag_Name_one tag_Name_two
   become: true
   tasks:
     - name: update
@@ -42,7 +42,7 @@
         name: pm2
 
 - name: Run app
-  hosts: instance_one instance_two
+  hosts: tag_Name_one tag_Name_two
   become: true
   tasks:
     - name: pull repo
@@ -62,7 +62,7 @@
         chdir: /home/ubuntu/app
 
 - name: Configure nginx reverse proxy
-  hosts: instance_one instance_two
+  hosts: tag_Name_one tag_Name_two
   become: true
   tasks:
     - name: create conf file
