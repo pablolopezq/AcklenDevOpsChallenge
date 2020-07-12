@@ -1,3 +1,4 @@
+
 # AcklenDevOpsChallenge
 
 ## Challenge Description
@@ -110,6 +111,24 @@ We need to place the instances in target groups for the load balancer to have ac
 
 #### Resource: aws_lb_target_group_attachment
 With these resources I created the targets in the target group. There is one for each instance. We need to specify the arn of the target group it belongs to, the target id which is the id of the instance, and the destination port of the incoming traffic.
+
+## Ansible
+
+Ansible is a tool to automate IT tasks. In this particular challenge, ansible is used to install and configuring every component needed for the application. An ansible playbook is divided into plays. I made a play for each task to be done for the application. All the hosts in the playbook are named "tag_Name_one" and "tag_Name_two". This is for ansible to be able to recognize the instances with the dynamic inventory. Also, for the plays with which I install packages and configure nginx, the "become" property is set to true. This is because the packages need to be installed with sudo, but it is not necessary for the running of the app.
+
+### Install nginx
+This play has 3 tasks. The first is the equivalent to "sudo apt udpate", the second one installs the nginx package, and the third one ensures that the nginx service is running.
+
+### Install node and pm2
+This play has 4 tasks. The first one to update the package manager cache, and the other 3 are for installing nodejs, npm, and pm2. PM2, a daemon process manager, is the program that we'll use to make sure that our application is running all the time.
+
+### Run app
+In the next play we have 3 tasks. We pull the app from the repository, run "npm install", and then run it using PM2.
+
+### Configure nginx reverse proxy
+Here we have 6 tasks. The first one creates the .conf file for our proxy and the second one writes to it. Then we check if a default .conf file exists, and if it exists, we unlink it from the enabled sites. After that, we link our .conf file to the enabled sites folder. Lastly, we need to restart nginx so that the changes can be visible.
+
+With all that, we look for the DNS Name for our Load Balancer and paste it in our browser. The application should be available.
 
 
 ## To run
