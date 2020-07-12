@@ -39,11 +39,6 @@ resource "aws_key_pair" "key" {
   public_key = var.public_key
 }
 
-resource "aws_key_pair" "key_two" {
-  key_name   = "key_two"
-  public_key = var.public_key_two
-}
-
 resource "aws_instance" "instance_one" {
   ami             = var.image
   instance_type   = var.ec2_type
@@ -65,7 +60,6 @@ resource "aws_instance" "instance_two" {
     Name = "two"
   }
 }
-
 
 resource "aws_lb" "app_load_balancer" {
   subnets            = [aws_subnet.subnet_one.id, aws_subnet.subnet_two.id]
@@ -91,31 +85,25 @@ resource "aws_security_group" "sec_group" {
   }
 }
 
-resource "aws_lb_target_group" "target_group_one" {
-  vpc_id   = data.aws_vpc.default.id
-  port     = 80
-  protocol = "HTTP"
-}
-
-resource "aws_lb_target_group" "target_group_two" {
+resource "aws_lb_target_group" "target_group" {
   vpc_id   = data.aws_vpc.default.id
   port     = 80
   protocol = "HTTP"
 }
 
 resource "aws_lb_target_group_attachment" "target_one" {
-  target_group_arn = aws_lb_target_group.target_group_one.arn
+  target_group_arn = aws_lb_target_group.target_group.arn
   target_id        = aws_instance.instance_one.id
   port             = 80
 }
 
 resource "aws_lb_target_group_attachment" "target_two" {
-  target_group_arn = aws_lb_target_group.target_group_two.arn
+  target_group_arn = aws_lb_target_group.target_group.arn
   target_id        = aws_instance.instance_two.id
   port             = 80
 }
 
-resource "aws_lb_listener" "listener_one" {
+resource "aws_lb_listener" "listener" {
   load_balancer_arn = aws_lb.app_load_balancer.arn
   port              = 80
   default_action {
@@ -123,10 +111,7 @@ resource "aws_lb_listener" "listener_one" {
 
     forward {
       target_group {
-        arn = aws_lb_target_group.target_group_one.arn
-      }
-      target_group {
-        arn = aws_lb_target_group.target_group_two.arn
+        arn = aws_lb_target_group.target_group.arn
       }
     }
   }

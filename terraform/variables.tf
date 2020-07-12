@@ -1,7 +1,3 @@
-variable "ansible_user" {
-  default = "ubuntu"
-}
-
 variable "region" {
   default = "us-east-2"
 }
