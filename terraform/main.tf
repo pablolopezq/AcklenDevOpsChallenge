@@ -107,12 +107,7 @@ resource "aws_lb_listener" "listener" {
   load_balancer_arn = aws_lb.app_load_balancer.arn
   port              = 80
   default_action {
-    type = "forward"
-
-    forward {
-      target_group {
-        arn = aws_lb_target_group.target_group.arn
-      }
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.target_group.arn
   }
 }

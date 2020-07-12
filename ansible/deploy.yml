@@ -43,7 +43,6 @@
 
 - name: Run app
   hosts: tag_Name_one tag_Name_two
-  become: true
   tasks:
     - name: pull repo
       git:
@@ -56,7 +55,6 @@
         chdir: /home/ubuntu/app
 
     - name: run app
-      become: no
       shell: pm2 start app.js --name "chatapp"
       args:
         chdir: /home/ubuntu/app
