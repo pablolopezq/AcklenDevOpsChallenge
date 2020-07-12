@@ -53,20 +53,6 @@ resource "aws_instance" "instance_one" {
   tags = {
     Name = "one"
   }
-  /*
-  provisioner "remote-exec" {
-    inline = ["sudo hostname"]
-    connection {
-      type = "ssh"
-      user = var.ansible_user
-      private_key = var.private_key_one
-      host = self.public_ip
-    }
-  }
-
-  provisioner "local-exec" {
-    command = "ansible-playbook ../ansible/deploy.yml -i ../ansible/ec2.py --private-key=../keys/instance_one.pem --user ubuntu"
-  }*/
 }
 
 resource "aws_instance" "instance_two" {
@@ -78,20 +64,6 @@ resource "aws_instance" "instance_two" {
   tags = {
     Name = "two"
   }
-  /*
-  provisioner "remote-exec" {
-    inline = ["sudo hostname"]
-    connection {
-      type = "ssh"
-      user = var.ansible_user
-      private_key = var.private_key_two
-      host = self.public_ip
-    }
-  }
-
-  provisioner "local-exec" {
-    command = "ansible-playbook ../ansible/deploy.yml -i ../ansible/ec2.py --private-key=../keys/instance_one.pem --user ubuntu"
-  }*/
 }
 
 
@@ -155,7 +127,6 @@ resource "aws_lb_listener" "listener_one" {
       }
       target_group {
         arn = aws_lb_target_group.target_group_two.arn
-
       }
     }
   }
