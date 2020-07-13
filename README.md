@@ -130,6 +130,9 @@ Here we have 6 tasks. The first one creates the .conf file for our proxy and the
 
 With all that, we look for the DNS Name for our Load Balancer and paste it in our browser. The application should be available.
 
+## Infrastructure
+The whole infrastructure looks like this.
+[![Diagram](./CHALLENGEDIAGRAM.png)]
 
 ## To run
 
